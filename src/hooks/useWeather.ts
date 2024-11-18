@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useMemo, useState } from 'react';
 import { z } from 'zod';
 import { SearchType } from '../types';
 
@@ -11,9 +12,18 @@ const Weather = z.object({
   }),
 });
 
-type Weather = z.infer<typeof Weather>;
+export type WeatherType = z.infer<typeof Weather>;
 
 export default function useWeather() {
+  const [weather, setWeather] = useState<WeatherType>({
+    name: '',
+    main: {
+      temp: 0,
+      temp_min: 0,
+      temp_max: 0,
+    },
+  });
+
   const fetchWeather = async (search: SearchType) => {
     const apiKey = import.meta.env.VITE_API_KEY;
     try {
@@ -30,7 +40,7 @@ export default function useWeather() {
       const result = Weather.safeParse(weatherResult);
 
       if (result.success) {
-        console.log(result.data);
+        setWeather(result.data);
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -46,7 +56,11 @@ export default function useWeather() {
     }
   };
 
+  const hasWeatherData = useMemo(() => weather.name, [weather]);
+
   return {
+    weather,
     fetchWeather,
+    hasWeatherData,
   };
 }
