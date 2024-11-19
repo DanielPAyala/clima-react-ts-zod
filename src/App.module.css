@@ -15,7 +15,12 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 4rem;
-    /* align-items: center; */
+    margin-top: 5rem;
+  }
+}
+
+@media (width<768px) {
+  .container> :last-child {
     margin-top: 5rem;
   }
 }

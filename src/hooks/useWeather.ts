@@ -25,28 +25,32 @@ export type WeatherType = z.infer<typeof Weather>;
 
 export default function useWeather() {
   const [weather, setWeather] = useState<WeatherType>(initialWeather);
-
   const [loading, setLoading] = useState(false);
+  const [notFound, setNotFound] = useState(false);
 
   const fetchWeather = async (search: SearchType) => {
     const apiKey = import.meta.env.VITE_API_KEY;
     setWeather(initialWeather);
     setLoading(true);
     try {
-      const geoUrl = `http://api.openweathermap.org/geo/1.0/direct?q=${search.city},${search.country}&appid=${apiKey}`;
-
+      const geoUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${search.city},${search.country}&appid=${apiKey}`;
       const { data } = await axios.get(geoUrl);
+
+      if (!data[0]) {
+        setNotFound(true);
+        return;
+      }
 
       const { lat, lon } = data[0];
 
       const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}`;
-
       const { data: weatherResult } = await axios.get(weatherUrl);
 
       const result = Weather.safeParse(weatherResult);
 
       if (result.success) {
         setWeather(result.data);
+        setNotFound(false);
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -69,6 +73,7 @@ export default function useWeather() {
   return {
     weather,
     loading,
+    notFound,
     fetchWeather,
     hasWeatherData,
   };
