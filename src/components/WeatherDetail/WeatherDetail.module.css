@@ -26,3 +26,9 @@
 .temperatures span {
   font-weight: 400;
 }
+
+@media (width<=768px) {
+  .container {
+    margin-top: 3rem;
+  }
+}

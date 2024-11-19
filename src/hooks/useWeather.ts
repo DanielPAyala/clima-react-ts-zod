@@ -12,20 +12,26 @@ const Weather = z.object({
   }),
 });
 
+const initialWeather = Weather.parse({
+  name: '',
+  main: {
+    temp: 0,
+    temp_min: 0,
+    temp_max: 0,
+  },
+});
+
 export type WeatherType = z.infer<typeof Weather>;
 
 export default function useWeather() {
-  const [weather, setWeather] = useState<WeatherType>({
-    name: '',
-    main: {
-      temp: 0,
-      temp_min: 0,
-      temp_max: 0,
-    },
-  });
+  const [weather, setWeather] = useState<WeatherType>(initialWeather);
+
+  const [loading, setLoading] = useState(false);
 
   const fetchWeather = async (search: SearchType) => {
     const apiKey = import.meta.env.VITE_API_KEY;
+    setWeather(initialWeather);
+    setLoading(true);
     try {
       const geoUrl = `http://api.openweathermap.org/geo/1.0/direct?q=${search.city},${search.country}&appid=${apiKey}`;
 
@@ -53,6 +59,8 @@ export default function useWeather() {
       } else {
         console.error('Unknown error', error);
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -60,6 +68,7 @@ export default function useWeather() {
 
   return {
     weather,
+    loading,
     fetchWeather,
     hasWeatherData,
   };
